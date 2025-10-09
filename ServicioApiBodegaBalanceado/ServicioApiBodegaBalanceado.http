@@ -1,0 +1,8 @@
+@ServicioApiBodegaBalanceado_HostAddress = http://localhost:5055
+
+GET {{ServicioApiBodegaBalanceado_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+
