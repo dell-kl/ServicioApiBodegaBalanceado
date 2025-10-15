@@ -2,9 +2,8 @@
 using Data.Repository.IRepository;
 using Domain;
 using Domain.DTO;
+using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
-using System.Net;
-using System.Text.Encodings.Web;
 
 namespace Business.Services.ProductService
 {
@@ -24,7 +23,35 @@ namespace Business.Services.ProductService
 
         public void Actualizar(RawMaterial entity)
         {
-            throw new NotImplementedException();
+            _unitOfWork.RawMaterialRepository.Update(entity);
+        }
+
+        public async Task AddStockRawMaterial(StockRawMaterial stockRawMaterial)
+        {
+            RawMaterial rawMaterial = await this.Buscar(Guid.Parse(stockRawMaterial.Identificador));
+            
+            KgMonitoring kgMonitoring = new KgMonitoring() { 
+                KgMonitoring_KGStandard = stockRawMaterial.kgStandard,
+                KgMonitoring_Total = (stockRawMaterial.kgStandard * stockRawMaterial.Amount),
+                KgMonitoring_priceUnit = (decimal)stockRawMaterial.PriceUnit,
+                KgMonitoring_priceTotal = (decimal)stockRawMaterial.PriceUnit * stockRawMaterial.Amount,
+                RawMaterial = rawMaterial
+            };
+
+            rawMaterial.RawMaterial_KgTotal += kgMonitoring.KgMonitoring_Total;
+            rawMaterial.RawMaterial_updated = DateTime.Now;
+
+            Accounting accounting = new Accounting()
+            {
+                Accounting_egreso = kgMonitoring.KgMonitoring_priceTotal,
+                KgMonitoring = kgMonitoring
+            };
+
+            this.Actualizar(rawMaterial);
+            await _unitOfWork.Accounting.Create(accounting);
+
+            _unitOfWork.Save();
+            _unitOfWork.Dispose();
         }
 
         public void Agregate(RawMaterialDto entityDto)
@@ -75,9 +102,14 @@ namespace Business.Services.ProductService
             throw new NotImplementedException();
         }
 
-        public Task<RawMaterial> Buscar(Guid id)
+        public Task<RawMaterial> Buscar(Guid id, string properties = "") => _unitOfWork.RawMaterialRepository.Buscar((item => item.RawMaterial_guid.Equals(id)), properties);
+
+        public async Task EditDataRawMaterial(RawMaterial rawMaterial)
         {
-            throw new NotImplementedException();
+            this.Actualizar(rawMaterial);
+
+            _unitOfWork.Save();
+            _unitOfWork.Dispose();
         }
 
         public void Eliminar(RawMaterial entity)
@@ -85,15 +117,28 @@ namespace Business.Services.ProductService
             throw new NotImplementedException();
         }
 
+        public async Task<RawMaterialDetailsRequestDto> GetDetailesRawMaterial(Guid guid)
+        {
+            RawMaterial rawMaterial = await this.Buscar(guid, "ImageRawMaterials, KgMonitorings");
+            RawMaterialDetailsRequestDto rawMaterialDetails = new RawMaterialDetailsRequestDto() { 
+                KgTotal = rawMaterial.RawMaterial_KgTotal,
+                TotalCompras = rawMaterial.KgMonitorings.Count(),
+                UltimaCompra = rawMaterial.KgMonitorings.OrderByDescending(item => item.KgMonitoring_id).First().KgMonitoring_priceTotal,
+                imagenes =
+                    rawMaterial.ImageRawMaterials.Any() ?
+                    rawMaterial.ImageRawMaterials.Select(item => $"{item.ImageRawMaterial_url}").ToList() : ["default_icon.png"]
+            };
+
+
+            return rawMaterialDetails;
+        }
+
         public IEnumerable<RawMaterial> Obtener()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<RawMaterial>> Obtener(int skip, string data)
-        {
-            return await _unitOfWork.RawMaterialRepository.Buscar(skip, data);
-        }
+        public async Task<IEnumerable<RawMaterial>> Obtener(int skip, string data) => await _unitOfWork.RawMaterialRepository.Buscar(skip, data);
 
         public async Task SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
         {
@@ -102,7 +147,7 @@ namespace Business.Services.ProductService
                 if (formFiles.Count() > 5)
                     formFiles = formFiles.Take(5);
 
-                RawMaterial rawMaterial = await _unitOfWork.RawMaterialRepository.Buscar( (item => item.RawMaterial_guid.Equals(guid)) );
+                RawMaterial rawMaterial = await this.Buscar(guid);
                 ICollection<ImageRawMaterial> imagenesRawMaterial = new List<ImageRawMaterial>();
 
                 string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageRawMaterial";

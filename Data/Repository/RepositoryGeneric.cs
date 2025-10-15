@@ -28,27 +28,37 @@ namespace Data.Repository
 
         public async Task<T> Buscar(Expression<Func<T, bool>> predicate, string includeProperties = null)
         {
-            T resultado;
+            IQueryable<T> resultado = this.dbSet.Where(predicate);
+            
+            if (!includeProperties.IsNullOrEmpty())
+            {
+                string[] properties = includeProperties.Split(",");
+                
+                foreach (var propertie in properties)
+                {
+                    resultado = resultado.Include(propertie.Trim());  
+                }
+            }
 
-            if (includeProperties.IsNullOrEmpty())
-                resultado = await this.dbSet.Where(predicate).FirstAsync();
-            else
-                resultado = await this.dbSet.Where(predicate)
-                        .Include(includeProperties)
-                        .FirstAsync();
-
-            return resultado;   
+            return await resultado.FirstAsync();   
         }
 
         public async Task<IEnumerable<T>> Buscar(int skip, string includeProperties = null)
         {
-            var resultados =  this.dbSet
-                                .Skip(skip)
-                                .Take(10)
-                                .Include(includeProperties)
-                                .ToList();
+            IQueryable<T> resultado = this.dbSet.Skip(skip)
+                .Take(10);
 
-            return resultados;
+            if (!includeProperties.IsNullOrEmpty())
+            {
+                string[] properties = includeProperties.Split(",");
+            
+                foreach(var propertie in properties)
+                {
+                    resultado = resultado.Include(propertie.Trim());
+                }
+            }
+
+            return resultado.ToList();
         }
 
         public void Update(T entity) => this.dbSet.Update(entity);

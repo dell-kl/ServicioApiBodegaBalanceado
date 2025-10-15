@@ -9,5 +9,6 @@ namespace Data.Repository
         public KGMonitoringRepository(ApplicationDbContext context) : base(context) { 
             _context = context;
         }
+
     }
 }

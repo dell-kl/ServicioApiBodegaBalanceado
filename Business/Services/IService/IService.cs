@@ -9,7 +9,7 @@
 
         public J Buscar(T entityDto);
 
-        public Task<J> Buscar(Guid id);
+        public Task<J> Buscar(Guid id, string properties = "");
     
         public void Actualizar(T datos, J entity);
 

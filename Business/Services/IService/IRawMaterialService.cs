@@ -1,5 +1,6 @@
 ﻿using Domain;
 using Domain.DTO;
+using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
 
 namespace Business.Services.IService
@@ -8,5 +9,10 @@ namespace Business.Services.IService
     {
         public Task SaveImages(IEnumerable<IFormFile> formFiles, Guid guid);
 
+        public Task AddStockRawMaterial(StockRawMaterial stockRawMaterial);
+
+        public Task<RawMaterialDetailsRequestDto> GetDetailesRawMaterial(Guid guid);
+
+        public Task EditDataRawMaterial(RawMaterial rawMaterial);
     }
 }

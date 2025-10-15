@@ -4,6 +4,7 @@ using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace ServicioApiBodegaBalanceado.Controllers
 {
@@ -20,7 +21,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
         public async Task<IActionResult> SolicitarMateriaPrima(int skip)
         {
             var listado = 
-                (await _serviceManagement._RawMaterialService.Obtener(skip, "ImageRawMaterials"));
+                (await _serviceManagement._RawMaterialService.Obtener(skip, "ImageRawMaterials, KgMonitorings"));
 
             ICollection<RawMaterialRequestDto> datos = new List<RawMaterialRequestDto>();
             foreach (var item in listado)
@@ -29,8 +30,8 @@ namespace ServicioApiBodegaBalanceado.Controllers
                 {
                     guid = item.RawMaterial_guid.ToString(),
                     nombreProducto = item.RawMaterial_name,
-                    rutaImagen = item.ImageRawMaterials.Any() ? $"http://192.168.100.19:5055/api/RawMaterial/ViewImage/{item.ImageRawMaterials.First().ImageRawMaterial_url}" : "default_icon.png",
-                    fechaUltimaCompra = DateTime.Now,
+                    rutaImagen = item.ImageRawMaterials.Any() ? item.ImageRawMaterials.First().ImageRawMaterial_url : "default_icon.png",
+                    fechaUltimaCompra = item.KgMonitorings.OrderByDescending(item => item.KgMonitoring_id).First().KgMonitoring_created,
                     kgTotal = item.RawMaterial_KgTotal
                 };
 
@@ -38,6 +39,14 @@ namespace ServicioApiBodegaBalanceado.Controllers
             }
 
             return Ok(JsonConvert.SerializeObject(datos));
+        }
+
+        [HttpGet("DetalleMateriaPrima/{guid}")]
+        public async Task<IActionResult> DetalleMateriaPrima(string guid) {
+
+           RawMaterialDetailsRequestDto rawMaterialDetails = await _serviceManagement._RawMaterialService.GetDetailesRawMaterial(Guid.Parse(guid));
+            
+            return Ok(JsonConvert.SerializeObject(rawMaterialDetails));
         }
 
         [HttpPost("RegistrarMateriaPrima")]
@@ -54,6 +63,24 @@ namespace ServicioApiBodegaBalanceado.Controllers
             return Ok("OK");
         }
 
+        [HttpPost("AgregarEnStock")]
+        public async Task<IActionResult> AgregarEnStock([FromBody] StockRawMaterial stockRawMaterial) {
+
+            await _serviceManagement._RawMaterialService.AddStockRawMaterial(stockRawMaterial);
+            
+            return Ok("Agregado Exitosamente");
+        }
+
+        [HttpPut("EditNameRawMaterial")]
+        public async Task<IActionResult> EditNameRawMaterial([FromBody] RawMaterialDto data)
+        {
+            RawMaterial rawMaterial = await _serviceManagement._RawMaterialService.Buscar(Guid.Parse(data.id_dto!));
+            rawMaterial.RawMaterial_name = data.nombre_dto;
+            rawMaterial.RawMaterial_updated = DateTime.Now;
+            await _serviceManagement._RawMaterialService.EditDataRawMaterial(rawMaterial);
+
+            return Ok("Materia Prima Editado Exitosamente");
+        }
 
         [HttpGet("ViewImage/{guid}")]
         public IActionResult ViewImage(string guid)
