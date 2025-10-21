@@ -20,8 +20,4 @@
     <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="FilesPublic\ImageRawMaterial\" />
-  </ItemGroup>
-
 </Project>

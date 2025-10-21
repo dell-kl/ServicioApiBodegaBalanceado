@@ -5,6 +5,7 @@ using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using Utility.Exceptions;
 
 namespace ServicioApiBodegaBalanceado.Controllers
 {
@@ -51,16 +52,30 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
         [HttpPost("RegistrarMateriaPrima")]
         public IActionResult RegistrarMateriaPrima([FromBody] RawMaterialDto rawMaterial) {
-            _serviceManagement._RawMaterialService.Agregate(rawMaterial);
-            return Ok("OK");
+            try
+            {
+                _serviceManagement._RawMaterialService.Agregate(rawMaterial);
+                return Ok("Datos registrados exitosamente");
+            }
+            catch (Exception ex) {
+                return StatusCode(StatusCodes.Status500InternalServerError, "El servidor tuvo un problema en guardar los datos");
+            }
         }
 
         [HttpPost("RegistrarImagenes")]
         public async Task<IActionResult> RegistrarImagenes([FromForm] IEnumerable<IFormFile> formFiles, [FromForm] string identificador) {
 
-            await _serviceManagement._RawMaterialService.SaveImages(formFiles, Guid.Parse(identificador));
+            try
+            {
+                ICollection<DataImage> dataImages = await _serviceManagement._RawMaterialService.SaveImages(formFiles, Guid.Parse(identificador));
 
-            return Ok("OK");
+                return Ok(new { mensaje = "Imagenes subidas exitosamente", imagenes = dataImages });
+        
+            }
+            catch ( OperationAbortExceptions operation )
+            {
+                return BadRequest("Maximo de imagenes superado. Solo se permite 10 imagenes en total");
+            }
         }
 
         [HttpPost("AgregarEnStock")]
@@ -68,18 +83,25 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
             await _serviceManagement._RawMaterialService.AddStockRawMaterial(stockRawMaterial);
             
-            return Ok("Agregado Exitosamente");
+            return Ok("Se ha agregado mas material a tu bodega");
         }
 
         [HttpPut("EditNameRawMaterial")]
         public async Task<IActionResult> EditNameRawMaterial([FromBody] RawMaterialDto data)
         {
-            RawMaterial rawMaterial = await _serviceManagement._RawMaterialService.Buscar(Guid.Parse(data.id_dto!));
-            rawMaterial.RawMaterial_name = data.nombre_dto;
-            rawMaterial.RawMaterial_updated = DateTime.Now;
-            await _serviceManagement._RawMaterialService.EditDataRawMaterial(rawMaterial);
+            try
+            {
+                RawMaterial rawMaterial = await _serviceManagement._RawMaterialService.Buscar(Guid.Parse(data.id_dto!));
+                rawMaterial.RawMaterial_name = data.nombre_dto;
+                rawMaterial.RawMaterial_updated = DateTime.Now;
+                await _serviceManagement._RawMaterialService.EditDataRawMaterial(rawMaterial);
 
-            return Ok("Materia Prima Editado Exitosamente");
+                return Ok("Materia Prima Editado Exitosamente");
+            }
+            catch(Exception e )
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "El servidor no pudo actualizar los datos, intentalo en otro momento");
+            }
         }
 
         [HttpGet("ViewImage/{guid}")]
@@ -97,6 +119,22 @@ namespace ServicioApiBodegaBalanceado.Controllers
             }
 
             return null;
+        }
+
+
+        [HttpPost("DeleteRawMaterial")]
+        public async Task<IActionResult> DeleteRawMaterial([FromBody] ICollection<DataImage> listadoImagenes)
+        {
+            try
+            {
+                await _serviceManagement._RawMaterialService.DeleteImages(listadoImagenes);
+
+                return Ok("Imagenes eliminadas exitosamente");
+            }
+            catch ( Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "El servidor tuvo un problema al eliminar las imagenes");
+            }
         }
     }
 }

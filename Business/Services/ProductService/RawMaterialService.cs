@@ -4,6 +4,8 @@ using Domain;
 using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data;
+using Utility.Exceptions;
 
 namespace Business.Services.ProductService
 {
@@ -104,6 +106,26 @@ namespace Business.Services.ProductService
 
         public Task<RawMaterial> Buscar(Guid id, string properties = "") => _unitOfWork.RawMaterialRepository.Buscar((item => item.RawMaterial_guid.Equals(id)), properties);
 
+        public async Task DeleteImages(ICollection<DataImage> images)
+        {
+
+            string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageRawMaterial";
+
+            foreach (DataImage image in images)
+            {
+
+                if (File.Exists($"{PathUbication}\\{image.Url}"))
+                    File.Delete($"{PathUbication}\\{image.Url}");
+
+                ImageRawMaterial imageRawMaterial = await _unitOfWork.ImageRawMaterialRepository.Buscar((item => item.ImageRawMaterial_guid.Equals(Guid.Parse(image.Identificador))));
+
+                _unitOfWork.ImageRawMaterialRepository.Delete(imageRawMaterial);
+            }
+ 
+            _unitOfWork.Save();
+            _unitOfWork.Dispose();
+        }
+
         public async Task EditDataRawMaterial(RawMaterial rawMaterial)
         {
             this.Actualizar(rawMaterial);
@@ -126,7 +148,16 @@ namespace Business.Services.ProductService
                 UltimaCompra = rawMaterial.KgMonitorings.OrderByDescending(item => item.KgMonitoring_id).First().KgMonitoring_priceTotal,
                 imagenes =
                     rawMaterial.ImageRawMaterials.Any() ?
-                    rawMaterial.ImageRawMaterials.Select(item => $"{item.ImageRawMaterial_url}").ToList() : ["default_icon.png"]
+                    
+                    rawMaterial.ImageRawMaterials.Select(item =>
+                    {
+                        return new DataImage()
+                        {
+                            Identificador = item.ImageRawMaterial_guid.ToString(),
+                            Url = item.ImageRawMaterial_url,
+                            Estado = false
+                        };
+                    }) : [ new DataImage() { Url = "default_icon.png" } ]
             };
 
 
@@ -140,14 +171,26 @@ namespace Business.Services.ProductService
 
         public async Task<IEnumerable<RawMaterial>> Obtener(int skip, string data) => await _unitOfWork.RawMaterialRepository.Buscar(skip, data);
 
-        public async Task SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
+        public async Task<ICollection<DataImage>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
         {
+            ICollection<DataImage> datImages = new List<DataImage>();
+
             if ( formFiles.Any())
             {
                 if (formFiles.Count() > 5)
                     formFiles = formFiles.Take(5);
 
-                RawMaterial rawMaterial = await this.Buscar(guid);
+                RawMaterial rawMaterial = await this.Buscar(guid, "ImageRawMaterials");
+                int totalImagenesFormFiles = formFiles.Count();
+                int conteoImagenesTotal = Math.Abs(rawMaterial.ImageRawMaterials.Count() - 10);
+
+                if (conteoImagenesTotal == 0)
+                    throw new OperationAbortExceptions();
+                
+
+                if (totalImagenesFormFiles > conteoImagenesTotal)
+                    formFiles = formFiles.Take(conteoImagenesTotal);
+
                 ICollection<ImageRawMaterial> imagenesRawMaterial = new List<ImageRawMaterial>();
 
                 string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageRawMaterial";
@@ -166,7 +209,14 @@ namespace Business.Services.ProductService
                         ImageRawMaterial_url = NewFileName,
                         RawMaterial = rawMaterial
                     };
+                    DataImage dataImage = new()
+                    {
+                        Identificador = imagenRawMaterial.ImageRawMaterial_guid.ToString(),
+                        Url = imagenRawMaterial.ImageRawMaterial_url,
+                        Estado = false
+                    };
                     imagenesRawMaterial.Add(imagenRawMaterial);
+                    datImages.Add(dataImage);
                     
                     if ( formFile.Length <= 3145728 && ExtensionAllowd.Contains(Extension) )
                     {
@@ -188,6 +238,8 @@ namespace Business.Services.ProductService
                 _unitOfWork.Save();
                 _unitOfWork.Dispose();
             }
+
+            return datImages;
         }
 
        
