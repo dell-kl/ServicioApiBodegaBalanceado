@@ -5,6 +5,7 @@ using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data;
+using Utility.DetectSO;
 using Utility.Exceptions;
 
 namespace Business.Services.ProductService
@@ -14,7 +15,8 @@ namespace Business.Services.ProductService
         private readonly IUnitOfWork _unitOfWork;
 
 
-        public RawMaterialService(IUnitOfWork unitOfWork) {
+        public RawMaterialService(IUnitOfWork unitOfWork)
+        {
             _unitOfWork = unitOfWork;
         }
 
@@ -31,8 +33,9 @@ namespace Business.Services.ProductService
         public async Task AddStockRawMaterial(StockRawMaterial stockRawMaterial)
         {
             RawMaterial rawMaterial = await this.Buscar(Guid.Parse(stockRawMaterial.Identificador));
-            
-            KgMonitoring kgMonitoring = new KgMonitoring() { 
+
+            KgMonitoring kgMonitoring = new KgMonitoring()
+            {
                 KgMonitoring_KGStandard = stockRawMaterial.kgStandard,
                 KgMonitoring_Total = (stockRawMaterial.kgStandard * stockRawMaterial.Amount),
                 KgMonitoring_priceUnit = (decimal)stockRawMaterial.PriceUnit,
@@ -70,7 +73,8 @@ namespace Business.Services.ProductService
             _unitOfWork.RawMaterialRepository.Create(rawMaterial);
 
             // luego tenemos que guardar todas las cosas en nuestra tabla -KGMonitoring-
-            IEnumerable<Accounting> coleccionAccounting = entityDto.KgMonitoringDtos.Select(item => {
+            IEnumerable<Accounting> coleccionAccounting = entityDto.KgMonitoringDtos.Select(item =>
+            {
 
                 KgMonitoring kgMonitoring = new KgMonitoring()
                 {
@@ -121,7 +125,7 @@ namespace Business.Services.ProductService
 
                 _unitOfWork.ImageRawMaterialRepository.Delete(imageRawMaterial);
             }
- 
+
             _unitOfWork.Save();
             _unitOfWork.Dispose();
         }
@@ -142,13 +146,14 @@ namespace Business.Services.ProductService
         public async Task<RawMaterialDetailsRequestDto> GetDetailesRawMaterial(Guid guid)
         {
             RawMaterial rawMaterial = await this.Buscar(guid, "ImageRawMaterials, KgMonitorings");
-            RawMaterialDetailsRequestDto rawMaterialDetails = new RawMaterialDetailsRequestDto() { 
+            RawMaterialDetailsRequestDto rawMaterialDetails = new RawMaterialDetailsRequestDto()
+            {
                 KgTotal = rawMaterial.RawMaterial_KgTotal,
                 TotalCompras = rawMaterial.KgMonitorings.Count(),
                 UltimaCompra = rawMaterial.KgMonitorings.OrderByDescending(item => item.KgMonitoring_id).First().KgMonitoring_priceTotal,
                 imagenes =
                     rawMaterial.ImageRawMaterials.Any() ?
-                    
+
                     rawMaterial.ImageRawMaterials.Select(item =>
                     {
                         return new DataImage()
@@ -157,7 +162,7 @@ namespace Business.Services.ProductService
                             Url = item.ImageRawMaterial_url,
                             Estado = false
                         };
-                    }) : [ new DataImage() { Url = "default_icon.png" } ]
+                    }) : [new DataImage() { Url = "default_icon.png" }]
             };
 
 
@@ -175,7 +180,7 @@ namespace Business.Services.ProductService
         {
             ICollection<DataImage> datImages = new List<DataImage>();
 
-            if ( formFiles.Any())
+            if (formFiles.Any())
             {
                 if (formFiles.Count() > 5)
                     formFiles = formFiles.Take(5);
@@ -186,14 +191,19 @@ namespace Business.Services.ProductService
 
                 if (conteoImagenesTotal == 0)
                     throw new OperationAbortExceptions();
-                
+
 
                 if (totalImagenesFormFiles > conteoImagenesTotal)
                     formFiles = formFiles.Take(conteoImagenesTotal);
 
                 ICollection<ImageRawMaterial> imagenesRawMaterial = new List<ImageRawMaterial>();
 
-                string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageRawMaterial";
+                string pathPartial = "\\FilesPublic\\ImageRawMaterial";
+
+                if (DetectSystemOperation.IsLinux())
+                    pathPartial = pathPartial.Replace("\\", "//");
+
+                string PathUbication = $"{Directory.GetCurrentDirectory()}{pathPartial}";
 
                 foreach (IFormFile formFile in formFiles)
                 {
@@ -217,8 +227,8 @@ namespace Business.Services.ProductService
                     };
                     imagenesRawMaterial.Add(imagenRawMaterial);
                     datImages.Add(dataImage);
-                    
-                    if ( formFile.Length <= 3145728 && ExtensionAllowd.Contains(Extension) )
+
+                    if (formFile.Length <= 3145728 && ExtensionAllowd.Contains(Extension))
                     {
                         if (!Directory.Exists(PathUbication))
                             Directory.CreateDirectory(PathUbication);
@@ -242,6 +252,6 @@ namespace Business.Services.ProductService
             return datImages;
         }
 
-       
+
     }
 }
