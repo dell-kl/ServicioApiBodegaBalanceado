@@ -5,20 +5,22 @@ using System.Linq.Expressions;
 
 namespace Data.Repository
 {
-    public class RepositoryGeneric<T>  : IRepositoryGeneric<T> where T: class
+    public class RepositoryGeneric<T> : IRepositoryGeneric<T> where T : class
     {
 
         private readonly ApplicationDbContext _context;
         internal DbSet<T> dbSet { set; get; }
 
-        public RepositoryGeneric(ApplicationDbContext context) {
+        public RepositoryGeneric(ApplicationDbContext context)
+        {
             this._context = context;
             dbSet = this._context.Set<T>();
         }
 
-        public async Task Create(T entity) {
-            
-            await this.dbSet.AddAsync(entity); 
+        public async Task Create(T entity)
+        {
+
+            await this.dbSet.AddAsync(entity);
         }
 
         public async Task CreateAll(IEnumerable<T> entities)
@@ -29,18 +31,18 @@ namespace Data.Repository
         public async Task<T> Buscar(Expression<Func<T, bool>> predicate, string includeProperties = null)
         {
             IQueryable<T> resultado = this.dbSet.Where(predicate);
-            
+
             if (!includeProperties.IsNullOrEmpty())
             {
                 string[] properties = includeProperties.Split(",");
-                
+
                 foreach (var propertie in properties)
                 {
-                    resultado = resultado.Include(propertie.Trim());  
+                    resultado = resultado.Include(propertie.Trim());
                 }
             }
 
-            return await resultado.FirstAsync();   
+            return await resultado.FirstAsync();
         }
 
         public async Task<IEnumerable<T>> Buscar(int skip, string includeProperties = null)
@@ -51,8 +53,8 @@ namespace Data.Repository
             if (!includeProperties.IsNullOrEmpty())
             {
                 string[] properties = includeProperties.Split(",");
-            
-                foreach(var propertie in properties)
+
+                foreach (var propertie in properties)
                 {
                     resultado = resultado.Include(propertie.Trim());
                 }

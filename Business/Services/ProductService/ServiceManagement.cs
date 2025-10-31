@@ -8,16 +8,20 @@ namespace Business.Services.ProductService
 
         public IRawMaterialService _RawMaterialService { get; }
 
-        public IKGMonitoringService _KgMonitoringService { get;  }
+        public IKGMonitoringService _KgMonitoringService { get; }
+
+        public ICatalogProductService _CatalogProductService { get; }
 
         public readonly IUnitOfWork _unitOfWork;
 
-        public ServiceManagement(IUnitOfWork unitOfWork) {
+        public ServiceManagement(IUnitOfWork unitOfWork)
+        {
 
             _unitOfWork = unitOfWork;
 
             _RawMaterialService = new RawMaterialService(_unitOfWork);
             _KgMonitoringService = new KgMonitoringService(_unitOfWork);
+            _CatalogProductService = new CatalogProductService(_unitOfWork);
         }
     }
 }

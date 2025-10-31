@@ -78,7 +78,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
                 return Ok(new { mensaje = "Imagenes subidas exitosamente", imagenes = dataImages });
 
             }
-            catch (OperationAbortExceptions operation)
+            catch (OperationAbortExceptions)
             {
                 return BadRequest("Maximo de imagenes superado. Solo se permite 10 imagenes en total");
             }
@@ -123,8 +123,6 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
 
             string ruta = Path.Combine($"{Directory.GetCurrentDirectory()}{pathPartial}", guid);
-
-            Console.WriteLine(ruta);
 
             if (Path.Exists(ruta))
             {
