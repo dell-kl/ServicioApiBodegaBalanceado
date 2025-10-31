@@ -1,6 +1,8 @@
+using System.Threading.Tasks;
 using Business.Services.IService;
 using Domain.DTO;
 using Microsoft.AspNetCore.Mvc;
+using ServicioApiBodegaBalanceado.Domain.DTO;
 using Utility.Exceptions;
 
 namespace ServicioApiBodegaBalanceado.Controllers
@@ -54,7 +56,30 @@ namespace ServicioApiBodegaBalanceado.Controllers
         [HttpPost("RegistrarImagenes")]
         public async Task<IActionResult> RegistrarImagenes([FromForm] IEnumerable<IFormFile> formFiles, [FromForm] string identificador)
         {
-            return Ok(new { mensaje = "Imagenes subidas exitosamente", imagenes = "" });
+            try
+            {
+                ICollection<DataImageDto> listadoImagenes = await _serviceManagement._CatalogProductService.SaveImages(formFiles, Guid.Parse(identificador));
+                return Ok(new { mensaje = "Imagenes subidas exitosamente", imagenes = listadoImagenes });
+            }
+            catch (System.Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error del servidor. No se pudieron guardar tus imagenes");
+            }
+        }
+
+        [HttpPost("EliminarImagenes")]
+        public async Task<IActionResult> EliminarImagenes([FromBody] ICollection<DataImageDto> listadoImagenes)
+        {
+            try
+            {
+                await _serviceManagement._CatalogProductService.DeleteImages(listadoImagenes);
+
+                return Ok("Imagenes eliminadas exitosamente");
+            }
+            catch (System.Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error del servidor. No se puedo eliminar tus imagenes, intentalo en otro momento.");
+            }
         }
     }
 }

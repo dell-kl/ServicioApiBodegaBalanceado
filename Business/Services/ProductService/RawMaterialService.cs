@@ -5,6 +5,7 @@ using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data;
+using ServicioApiBodegaBalanceado.Domain.DTO;
 using Utility.DetectSO;
 using Utility.Exceptions;
 
@@ -110,12 +111,12 @@ namespace Business.Services.ProductService
 
         public Task<RawMaterial> Buscar(Guid id, string properties = "") => _unitOfWork.RawMaterialRepository.Buscar((item => item.RawMaterial_guid.Equals(id)), properties);
 
-        public async Task DeleteImages(ICollection<DataImage> images)
+        public async Task DeleteImages(ICollection<DataImageDto> images)
         {
 
             string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageRawMaterial";
 
-            foreach (DataImage image in images)
+            foreach (DataImageDto image in images)
             {
 
                 if (File.Exists($"{PathUbication}\\{image.Url}"))
@@ -156,13 +157,13 @@ namespace Business.Services.ProductService
 
                     rawMaterial.ImageRawMaterials.Select(item =>
                     {
-                        return new DataImage()
+                        return new DataImageDto()
                         {
                             Identificador = item.ImageRawMaterial_guid.ToString(),
                             Url = item.ImageRawMaterial_url,
                             Estado = false
                         };
-                    }) : [new DataImage() { Url = "default_icon.png" }]
+                    }) : [new DataImageDto() { Url = "default_icon.png" }]
             };
 
 
@@ -176,9 +177,9 @@ namespace Business.Services.ProductService
 
         public async Task<IEnumerable<RawMaterial>> Obtener(int skip, string data) => await _unitOfWork.RawMaterialRepository.Buscar(skip, data);
 
-        public async Task<ICollection<DataImage>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
+        public async Task<ICollection<DataImageDto>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
         {
-            ICollection<DataImage> datImages = new List<DataImage>();
+            ICollection<DataImageDto> datImages = new List<DataImageDto>();
 
             if (formFiles.Any())
             {
@@ -219,7 +220,7 @@ namespace Business.Services.ProductService
                         ImageRawMaterial_url = NewFileName,
                         RawMaterial = rawMaterial
                     };
-                    DataImage dataImage = new()
+                    DataImageDto dataImage = new()
                     {
                         Identificador = imagenRawMaterial.ImageRawMaterial_guid.ToString(),
                         Url = imagenRawMaterial.ImageRawMaterial_url,

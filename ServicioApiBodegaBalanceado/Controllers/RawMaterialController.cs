@@ -4,6 +4,7 @@ using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using ServicioApiBodegaBalanceado.Domain.DTO;
 using System.Threading.Tasks;
 using Utility.DetectSO;
 using Utility.Exceptions;
@@ -73,7 +74,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
             try
             {
-                ICollection<DataImage> dataImages = await _serviceManagement._RawMaterialService.SaveImages(formFiles, Guid.Parse(identificador));
+                ICollection<DataImageDto> dataImages = await _serviceManagement._RawMaterialService.SaveImages(formFiles, Guid.Parse(identificador));
 
                 return Ok(new { mensaje = "Imagenes subidas exitosamente", imagenes = dataImages });
 
@@ -136,7 +137,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
 
         [HttpPost("DeleteRawMaterial")]
-        public async Task<IActionResult> DeleteRawMaterial([FromBody] ICollection<DataImage> listadoImagenes)
+        public async Task<IActionResult> DeleteRawMaterial([FromBody] ICollection<DataImageDto> listadoImagenes)
         {
             try
             {

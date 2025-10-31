@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using ServicioApiBodegaBalanceado.Domain.DTO;
 
 namespace Domain.DTO.RequestDto
 {
@@ -10,14 +11,7 @@ namespace Domain.DTO.RequestDto
 
         public IEnumerable<KgMonitoringRequestDto> KgSeguimiento { set; get; } = new List<KgMonitoringRequestDto>();
 
-        public IEnumerable<DataImage> imagenes { set; get; } = new List<DataImage>();
+        public IEnumerable<DataImageDto> imagenes { set; get; } = new List<DataImageDto>();
     }
 
-
-    public class DataImage
-    {
-        public string Identificador { set; get; } = null!;
-        public string Url { set; get; } = null!;
-        public bool Estado { set; get; } = false;
-    }
 }

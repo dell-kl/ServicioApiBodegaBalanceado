@@ -2,12 +2,13 @@
 using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
+using ServicioApiBodegaBalanceado.Domain.DTO;
 
 namespace Business.Services.IService
 {
     public interface IRawMaterialService : IService<RawMaterialDto, RawMaterial>
     {
-        public Task<ICollection<DataImage>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid);
+        public Task<ICollection<DataImageDto>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid);
 
         public Task AddStockRawMaterial(StockRawMaterial stockRawMaterial);
 
@@ -15,6 +16,6 @@ namespace Business.Services.IService
 
         public Task EditDataRawMaterial(RawMaterial rawMaterial);
 
-        public Task DeleteImages(ICollection<DataImage> images);
+        public Task DeleteImages(ICollection<DataImageDto> images);
     }
 }
