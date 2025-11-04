@@ -111,8 +111,13 @@ namespace Business.Services.ProductService
 
             foreach (DataImageDto image in images)
             {
-                if (File.Exists($"{PathUbication}\\{image.Url}"))
-                    File.Delete($"{PathUbication}\\{image.Url}");
+                string PathComplete = $"{PathUbication}\\{image.Url}";
+
+                if (DetectSystemOperation.IsLinux())
+                    PathComplete = PathComplete.Replace("\\", "//");
+
+                if (File.Exists(PathComplete))
+                    File.Delete(PathComplete);
 
                 ImageCatalogProduction imageCatalogProduction = await _unitOfWork.ImageCatalogProductionRepository.Buscar(
                     item => item.ImageCatalogProduction_guid.Equals(Guid.Parse(image.Identificador))
@@ -135,9 +140,9 @@ namespace Business.Services.ProductService
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<CatalogProduction>> Obtener(int skip, string data)
+        public async Task<IEnumerable<CatalogProduction>> Obtener(int skip, string data)
         {
-            throw new NotImplementedException();
+            return await _unitOfWork.CatalogProductRepository.Buscar(skip, data);
         }
 
         public async Task<ICollection<DataImageDto>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)

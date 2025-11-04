@@ -115,7 +115,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
         [HttpGet("ViewImage/{guid}")]
         public IActionResult ViewImage(string guid)
         {
-            Response.Headers?.Add("Content-Type", "image/jpeg");
+            Response.Headers["Content-Type"] = "image/jpeg";
 
             string pathPartial = "\\FilesPublic\\ImageRawMaterial";
 
@@ -132,7 +132,9 @@ namespace ServicioApiBodegaBalanceado.Controllers
                 return File(byteLists, "image/jpeg");
             }
 
-            return null;
+            Response.Headers["Content-Type"] = "text/plain";
+
+            return StatusCode(StatusCodes.Status404NotFound, "Recurso no encontrado");
         }
 
 

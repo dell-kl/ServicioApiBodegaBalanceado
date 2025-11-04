@@ -118,11 +118,15 @@ namespace Business.Services.ProductService
 
             foreach (DataImageDto image in images)
             {
+                string PathComplete = $"{PathUbication}\\{image.Url}";
 
-                if (File.Exists($"{PathUbication}\\{image.Url}"))
-                    File.Delete($"{PathUbication}\\{image.Url}");
+                if (DetectSystemOperation.IsLinux())
+                    PathComplete = PathComplete.Replace("\\", "//");
 
-                ImageRawMaterial imageRawMaterial = await _unitOfWork.ImageRawMaterialRepository.Buscar((item => item.ImageRawMaterial_guid.Equals(Guid.Parse(image.Identificador))));
+                if (File.Exists(PathComplete))
+                    File.Delete(PathComplete);
+
+                ImageRawMaterial imageRawMaterial = await _unitOfWork.ImageRawMaterialRepository.Buscar(item => item.ImageRawMaterial_guid.Equals(Guid.Parse(image.Identificador)));
 
                 _unitOfWork.ImageRawMaterialRepository.Delete(imageRawMaterial);
             }

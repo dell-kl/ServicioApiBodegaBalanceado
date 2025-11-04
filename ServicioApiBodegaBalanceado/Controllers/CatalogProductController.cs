@@ -2,6 +2,8 @@ using System.Threading.Tasks;
 using Business.Services.IService;
 using Domain.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Domain.DTO.RequestDto;
+using Newtonsoft.Json;
 using ServicioApiBodegaBalanceado.Domain.DTO;
 using Utility.Exceptions;
 
@@ -17,6 +19,28 @@ namespace ServicioApiBodegaBalanceado.Controllers
         public CatalogProductController(IServiceManagement serviceManagement)
         {
             _serviceManagement = serviceManagement;
+        }
+
+        [HttpGet("SolicitarCatalogProduct/{skip}")]
+        public async Task<IActionResult> SolicitarCatalogProduct(int skip)
+        {
+            var listado = await _serviceManagement._CatalogProductService.Obtener(skip, "ImageCatalogProductions, DataCatalogProduct");
+
+            ICollection<CatalogProductRequestDto> datos = new List<CatalogProductRequestDto>();
+
+            foreach (var item in listado)
+            {
+                var register = new CatalogProductRequestDto()
+                {
+                    guid = item.CatalogProduction_guid.ToString(),
+                    nombreProducto = item.CatalogProduction_name,
+                    rutaImagen = item.ImageCatalogProductions.Any() ? item.ImageCatalogProductions.First().ImageCatalogProduction_name : "default_icon.png"
+                };
+
+                datos.Add(register);
+            }
+
+            return Ok(JsonConvert.SerializeObject(datos));
         }
 
         [HttpPost("RegistrarDataCatalogProduct")]
