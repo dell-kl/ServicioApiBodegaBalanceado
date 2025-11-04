@@ -7,5 +7,7 @@ namespace Business.Services.IService
         public IRawMaterialService _RawMaterialService { get; }
 
         public IKGMonitoringService _KgMonitoringService { get; }
+
+        public ICatalogProductService _CatalogProductService { get; }
     }
 }

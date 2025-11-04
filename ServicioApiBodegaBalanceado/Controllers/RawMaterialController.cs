@@ -4,6 +4,7 @@ using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using ServicioApiBodegaBalanceado.Domain.DTO;
 using System.Threading.Tasks;
 using Utility.DetectSO;
 using Utility.Exceptions;
@@ -73,12 +74,12 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
             try
             {
-                ICollection<DataImage> dataImages = await _serviceManagement._RawMaterialService.SaveImages(formFiles, Guid.Parse(identificador));
+                ICollection<DataImageDto> dataImages = await _serviceManagement._RawMaterialService.SaveImages(formFiles, Guid.Parse(identificador));
 
                 return Ok(new { mensaje = "Imagenes subidas exitosamente", imagenes = dataImages });
 
             }
-            catch (OperationAbortExceptions operation)
+            catch (OperationAbortExceptions)
             {
                 return BadRequest("Maximo de imagenes superado. Solo se permite 10 imagenes en total");
             }
@@ -114,7 +115,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
         [HttpGet("ViewImage/{guid}")]
         public IActionResult ViewImage(string guid)
         {
-            Response.Headers?.Add("Content-Type", "image/jpeg");
+            Response.Headers["Content-Type"] = "image/jpeg";
 
             string pathPartial = "\\FilesPublic\\ImageRawMaterial";
 
@@ -124,8 +125,6 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
             string ruta = Path.Combine($"{Directory.GetCurrentDirectory()}{pathPartial}", guid);
 
-            Console.WriteLine(ruta);
-
             if (Path.Exists(ruta))
             {
                 byte[] byteLists = System.IO.File.ReadAllBytes(ruta);
@@ -133,12 +132,14 @@ namespace ServicioApiBodegaBalanceado.Controllers
                 return File(byteLists, "image/jpeg");
             }
 
-            return null;
+            Response.Headers["Content-Type"] = "text/plain";
+
+            return StatusCode(StatusCodes.Status404NotFound, "Recurso no encontrado");
         }
 
 
         [HttpPost("DeleteRawMaterial")]
-        public async Task<IActionResult> DeleteRawMaterial([FromBody] ICollection<DataImage> listadoImagenes)
+        public async Task<IActionResult> DeleteRawMaterial([FromBody] ICollection<DataImageDto> listadoImagenes)
         {
             try
             {

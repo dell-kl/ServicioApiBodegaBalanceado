@@ -10,6 +10,8 @@ namespace Utility.DetectSO
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 return true;
 
+
+
             return false;
         }
 
