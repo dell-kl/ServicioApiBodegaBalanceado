@@ -112,31 +112,6 @@ namespace ServicioApiBodegaBalanceado.Controllers
             }
         }
 
-        [HttpGet("ViewImage/{guid}")]
-        public IActionResult ViewImage(string guid)
-        {
-            Response.Headers["Content-Type"] = "image/jpeg";
-
-            string pathPartial = "\\FilesPublic\\ImageRawMaterial";
-
-            if (DetectSystemOperation.IsLinux())
-                pathPartial = pathPartial.Replace("\\", "//");
-
-
-            string ruta = Path.Combine($"{Directory.GetCurrentDirectory()}{pathPartial}", guid);
-
-            if (Path.Exists(ruta))
-            {
-                byte[] byteLists = System.IO.File.ReadAllBytes(ruta);
-
-                return File(byteLists, "image/jpeg");
-            }
-
-            Response.Headers["Content-Type"] = "text/plain";
-
-            return StatusCode(StatusCodes.Status404NotFound, "Recurso no encontrado");
-        }
-
 
         [HttpPost("DeleteRawMaterial")]
         public async Task<IActionResult> DeleteRawMaterial([FromBody] ICollection<DataImageDto> listadoImagenes)

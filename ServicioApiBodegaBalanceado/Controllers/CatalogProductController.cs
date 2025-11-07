@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Business.Services.IService;
 using Domain.DTO;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +5,9 @@ using Domain.DTO.RequestDto;
 using Newtonsoft.Json;
 using ServicioApiBodegaBalanceado.Domain.DTO;
 using Utility.Exceptions;
+using Domain;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ServicioApiBodegaBalanceado.Controllers
 {
@@ -24,7 +26,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
         [HttpGet("SolicitarCatalogProduct/{skip}")]
         public async Task<IActionResult> SolicitarCatalogProduct(int skip)
         {
-            var listado = await _serviceManagement._CatalogProductService.Obtener(skip, "ImageCatalogProductions, DataCatalogProduct");
+            IEnumerable<CatalogProduction> listado = await _serviceManagement._CatalogProductService.Obtener(skip, "ImageCatalogProductions, DataCatalogProduct");
 
             ICollection<CatalogProductRequestDto> datos = new List<CatalogProductRequestDto>();
 
@@ -34,13 +36,54 @@ namespace ServicioApiBodegaBalanceado.Controllers
                 {
                     guid = item.CatalogProduction_guid.ToString(),
                     nombreProducto = item.CatalogProduction_name,
-                    rutaImagen = item.ImageCatalogProductions.Any() ? item.ImageCatalogProductions.First().ImageCatalogProduction_name : "default_icon.png"
+                    rutaImagen = item.ImageCatalogProductions.Any() ? item.ImageCatalogProductions.First().ImageCatalogProduction_name : "default_icon.png",
+                    fechaCreacion = item.CatalogProduction_created,
+                    numeroCategorias = item.DataCatalogProduct.Count(),
+                    totalSacosCatalogo = item.DataCatalogProduct.Sum(item => item.DataCatalogProduct_countTotal)
                 };
 
                 datos.Add(register);
             }
 
             return Ok(JsonConvert.SerializeObject(datos));
+        }
+
+        [HttpGet("SolicitarDataCatalogProduct/{skip}")]
+        public async Task<IActionResult> SolicitarDataCatalogProduct(int skip, [FromQuery] string guid)
+        {
+            if (guid.IsNullOrEmpty())
+                return StatusCode(StatusCodes.Status500InternalServerError, "El identificador del producto no puede estar vacio");
+
+            CatalogProduction? catalogProduction = null;
+            try
+            {
+                Guid identificador = Guid.Parse(guid);
+                catalogProduction = await _serviceManagement._CatalogProductService.Buscar(identificador);
+            }
+            catch (FormatException) { return StatusCode(StatusCodes.Status500InternalServerError, "El identificador del producto no tiene el formato correcto"); }
+
+            if (catalogProduction is null)
+                return StatusCode(StatusCodes.Status500InternalServerError, "No se puedo encontrar el registro");
+
+            IEnumerable<DataCatalogProduct> dataCatalogProducts = await _serviceManagement._CatalogProductService.ObtenerDataCatalogProduct(skip, "KG_Catalog, Price_KG", catalogProduction.CatalogProduction_id);
+
+            ICollection<DataCatalogProductoRequestDto> datos = new List<DataCatalogProductoRequestDto>();
+
+            foreach (DataCatalogProduct dataCatalog in dataCatalogProducts)
+            {
+                DataCatalogProductoRequestDto dataCatalogProductRequestDto = new()
+                {
+                    guid = dataCatalog.DataCatalogProduct_guid.ToString(),
+                    cantidadTotal = dataCatalog.DataCatalogProduct_countTotal,
+                    fechaCreacion = dataCatalog.DataCatalogProduct_created,
+                    fechaActualizacion = dataCatalog.DataCatalogProduct_updated,
+                    pesoKg = dataCatalog.KG_Catalog.KGCatalog_cantidad,
+                    precio = dataCatalog.Price_KG.PriceKG_price
+                };
+                datos.Add(dataCatalogProductRequestDto);
+            }
+
+            return Ok(datos);
         }
 
         [HttpPost("RegistrarDataCatalogProduct")]

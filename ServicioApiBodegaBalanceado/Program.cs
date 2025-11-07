@@ -65,7 +65,7 @@ app.MapGet("/visor_imagenes", async (HttpContext context) =>
         if (pathPartial is not null)
         {
             if (DetectSystemOperation.IsLinux())
-                pathPartial = pathPartial!.Replace("\\", "//");
+                pathPartial = pathPartial!.Replace("\\", "/");
 
             string ruta = Path.Combine($"{Directory.GetCurrentDirectory()}{pathPartial}", queryStrings["imagen"]!);
 
