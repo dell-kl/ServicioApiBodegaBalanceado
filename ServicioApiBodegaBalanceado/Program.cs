@@ -9,6 +9,7 @@ using Business.Services.ProductService;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Utility.DetectSO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,43 +47,26 @@ var app = builder.Build();
 //esta api minima va a ser de manera general para ver nuestras imagenes.
 app.MapGet("/visor_imagenes", async (HttpContext context) =>
 {
-    context.Response.ContentType = "image/jpeg";
-    var queryStrings = context.Request.Query;
-
-    if (
-        queryStrings!.Keys.Contains("imagen") && queryStrings!.Keys.Contains("tipo")
-        &&
-        queryStrings["imagen"].Any() && queryStrings["tipo"].Any()
-    )
+    if (context.Request.Query.TryGetValue("imagen", out var imagen) && context.Request.Query.TryGetValue("tipo", out var tipo)
+    && !string.IsNullOrWhiteSpace(imagen) && !string.IsNullOrWhiteSpace(tipo))
     {
-        string? pathPartial = null;
-
-        if (queryStrings["tipo"] == "catalogProduct")
-            pathPartial = "\\FilesPublic\\ImageCatalogProduction";
-        else if (queryStrings["tipo"] == "rawMaterial")
-            pathPartial = "\\FilesPublic\\ImageRawMaterial";
-
-        if (pathPartial is not null)
+        Dictionary<string, string> rutasRecursos = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            if (DetectSystemOperation.IsLinux())
-                pathPartial = pathPartial!.Replace("\\", "/");
+            { "catalogProduct", Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageCatalogProduction") },
+            { "rawMaterial", Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageRawMaterial") }
+        };
 
-            string ruta = Path.Combine($"{Directory.GetCurrentDirectory()}{pathPartial}", queryStrings["imagen"]!);
+        if (!rutasRecursos.TryGetValue(tipo!, out var pathPartial))
+            return Results.BadRequest("Tipo de recurso no válido.");
 
-            if (Path.Exists(ruta))
-            {
-                byte[] byteLists = System.IO.File.ReadAllBytes(ruta);
+        string fileName = Path.GetFileName(imagen!);
+        string fullname = Path.Combine(pathPartial, fileName);
 
-                await context.Response.Body.WriteAsync(byteLists, 0, byteLists.Length);
-
-                return;
-            }
-        }
+        if (File.Exists(fullname))
+            return Results.File(fullname, contentType: "image/png");
 
     }
-
-    context.Response.ContentType = "text/plain";
-    await context.Response.WriteAsync("Recurso no encontrado");
+    return Results.BadRequest("Error solicitud");
 });
 
 using (var db = app.Services.CreateScope())
@@ -94,7 +78,7 @@ using (var db = app.Services.CreateScope())
         var context = services.GetRequiredService<ApplicationDbContext>();
         new Seeder(context).cargarDatos();
     }
-    catch (Exception e)
+    catch (Exception)
     {
         Console.WriteLine(" ====================================== ");
         Console.WriteLine("[!] No se puedo cargar datos iniciales");

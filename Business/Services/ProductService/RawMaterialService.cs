@@ -121,7 +121,7 @@ namespace Business.Services.ProductService
                 string PathComplete = $"{PathUbication}\\{image.Url}";
 
                 if (DetectSystemOperation.IsLinux())
-                    PathComplete = PathComplete.Replace("\\", "//");
+                    PathComplete = PathComplete.Replace("\\", "/");
 
                 if (File.Exists(PathComplete))
                     File.Delete(PathComplete);
@@ -206,7 +206,7 @@ namespace Business.Services.ProductService
                 string pathPartial = "\\FilesPublic\\ImageRawMaterial";
 
                 if (DetectSystemOperation.IsLinux())
-                    pathPartial = pathPartial.Replace("\\", "//");
+                    pathPartial = pathPartial.Replace("\\", "/");
 
                 string PathUbication = $"{Directory.GetCurrentDirectory()}{pathPartial}";
 

@@ -45,9 +45,31 @@ namespace Data.Repository
             return await resultado.FirstAsync();
         }
 
+        /*
+        @Comment: Método para buscar un conjunto de entidades con paginación y propiedades relacionadas. Esto busca de 10 en 10.
+        */
         public async Task<IEnumerable<T>> Buscar(int skip, string includeProperties = null)
         {
             IQueryable<T> resultado = this.dbSet.Skip(skip)
+                .Take(10);
+
+            if (!includeProperties.IsNullOrEmpty())
+            {
+                string[] properties = includeProperties.Split(",");
+
+                foreach (var propertie in properties)
+                {
+                    resultado = resultado.Include(propertie.Trim());
+                }
+            }
+
+            return resultado.ToList();
+        }
+
+        public async Task<IEnumerable<T>> Buscar(Expression<Func<T, bool>> predicate, int skip, string includeProperties = null)
+        {
+            IQueryable<T> resultado = this.dbSet.Where(predicate)
+                .Skip(skip)
                 .Take(10);
 
             if (!includeProperties.IsNullOrEmpty())

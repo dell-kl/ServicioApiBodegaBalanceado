@@ -35,6 +35,7 @@ namespace Business.Services.ProductService
             {
                 CatalogProduction catalogProduction = new CatalogProduction()
                 {
+                    CatalogProduction_guid = Guid.Parse(entityDto.identificador),
                     CatalogProduction_name = entityDto.nombreProducto,
                 };
 
@@ -114,7 +115,7 @@ namespace Business.Services.ProductService
                 string PathComplete = $"{PathUbication}\\{image.Url}";
 
                 if (DetectSystemOperation.IsLinux())
-                    PathComplete = PathComplete.Replace("\\", "//");
+                    PathComplete = PathComplete.Replace("\\", "/");
 
                 if (File.Exists(PathComplete))
                     File.Delete(PathComplete);
@@ -145,6 +146,11 @@ namespace Business.Services.ProductService
             return await _unitOfWork.CatalogProductRepository.Buscar(skip, data);
         }
 
+        public async Task<IEnumerable<DataCatalogProduct>> ObtenerDataCatalogProduct(int skip, string data, int idCatalogProduct)
+        {
+            return await _unitOfWork.DataCatalogProductRepository.Buscar(item => item.CatalogProductionCatalogProduction_id == idCatalogProduct, skip, data);
+        }
+
         public async Task<ICollection<DataImageDto>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
         {
             ICollection<DataImageDto> datImages = new List<DataImageDto>();
@@ -170,7 +176,7 @@ namespace Business.Services.ProductService
                 string pathPartial = "\\FilesPublic\\ImageCatalogProduction";
 
                 if (DetectSystemOperation.IsLinux())
-                    pathPartial = pathPartial.Replace("\\", "//");
+                    pathPartial = pathPartial.Replace("\\", "/");
 
                 string PathUbication = $"{Directory.GetCurrentDirectory()}{pathPartial}";
 
