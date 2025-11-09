@@ -6,7 +6,6 @@ using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data;
 using ServicioApiBodegaBalanceado.Domain.DTO;
-using Utility.DetectSO;
 using Utility.Exceptions;
 
 namespace Business.Services.ProductService
@@ -113,15 +112,11 @@ namespace Business.Services.ProductService
 
         public async Task DeleteImages(ICollection<DataImageDto> images)
         {
-
-            string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageRawMaterial";
+            string PathUbication = Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageRawMaterial");
 
             foreach (DataImageDto image in images)
             {
-                string PathComplete = $"{PathUbication}\\{image.Url}";
-
-                if (DetectSystemOperation.IsLinux())
-                    PathComplete = PathComplete.Replace("\\", "/");
+                string PathComplete = Path.Combine(PathUbication, image.Url);
 
                 if (File.Exists(PathComplete))
                     File.Delete(PathComplete);
@@ -181,6 +176,12 @@ namespace Business.Services.ProductService
 
         public async Task<IEnumerable<RawMaterial>> Obtener(int skip, string data) => await _unitOfWork.RawMaterialRepository.Buscar(skip, data);
 
+        public async Task<IEnumerable<KgMonitoring>> ObtenerKgMonitorings(Guid rawMaterialGuid, int skip, string data)
+        {
+            // Busca los KgMonitoring asociados al RawMaterial filtrando por guid, paginando de 10 en 10.
+            return await _unitOfWork.KgMonitoring.Buscar(item => item.RawMaterial.RawMaterial_guid.Equals(rawMaterialGuid), skip, data);
+        }
+
         public async Task<ICollection<DataImageDto>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
         {
             ICollection<DataImageDto> datImages = new List<DataImageDto>();
@@ -203,12 +204,7 @@ namespace Business.Services.ProductService
 
                 ICollection<ImageRawMaterial> imagenesRawMaterial = new List<ImageRawMaterial>();
 
-                string pathPartial = "\\FilesPublic\\ImageRawMaterial";
-
-                if (DetectSystemOperation.IsLinux())
-                    pathPartial = pathPartial.Replace("\\", "/");
-
-                string PathUbication = $"{Directory.GetCurrentDirectory()}{pathPartial}";
+                string PathUbication = Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageRawMaterial");
 
                 foreach (IFormFile formFile in formFiles)
                 {

@@ -17,5 +17,7 @@ namespace Business.Services.IService
         public Task EditDataRawMaterial(RawMaterial rawMaterial);
 
         public Task DeleteImages(ICollection<DataImageDto> images);
+
+        public Task<IEnumerable<KgMonitoring>> ObtenerKgMonitorings(Guid rawMaterialGuid, int skip, string data);
     }
 }

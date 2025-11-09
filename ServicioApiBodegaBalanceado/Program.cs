@@ -7,7 +7,6 @@ using Data.Seeders;
 using Business.Services.IService;
 using Business.Services.ProductService;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Utility.DetectSO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 

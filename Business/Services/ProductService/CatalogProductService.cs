@@ -1,7 +1,6 @@
 using Business.Services.IService;
 using Data.Repository.IRepository;
 using Domain;
-using Utility.DetectSO;
 using Domain.DTO;
 using Microsoft.AspNetCore.Http;
 using ServicioApiBodegaBalanceado.Domain.DTO;
@@ -26,7 +25,10 @@ namespace Business.Services.ProductService
 
         public void Actualizar(CatalogProduction entity)
         {
-            throw new NotImplementedException();
+            _unitOfWork.CatalogProductRepository.Update(entity);
+
+            _unitOfWork.Save();
+            _unitOfWork.Dispose();
         }
 
         public async void Agregate(CatalogProductDto entityDto)
@@ -108,14 +110,11 @@ namespace Business.Services.ProductService
 
         public async Task DeleteImages(ICollection<DataImageDto> images)
         {
-            string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageCatalogProduction";
+            string PathUbication = Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageCatalogProduction");
 
             foreach (DataImageDto image in images)
             {
-                string PathComplete = $"{PathUbication}\\{image.Url}";
-
-                if (DetectSystemOperation.IsLinux())
-                    PathComplete = PathComplete.Replace("\\", "/");
+                string PathComplete = Path.Combine(PathUbication, image.Url);
 
                 if (File.Exists(PathComplete))
                     File.Delete(PathComplete);
@@ -173,12 +172,7 @@ namespace Business.Services.ProductService
 
                 ICollection<ImageCatalogProduction> imagenesCatalogProduction = new List<ImageCatalogProduction>();
 
-                string pathPartial = "\\FilesPublic\\ImageCatalogProduction";
-
-                if (DetectSystemOperation.IsLinux())
-                    pathPartial = pathPartial.Replace("\\", "/");
-
-                string PathUbication = $"{Directory.GetCurrentDirectory()}{pathPartial}";
+                string PathUbication = Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageCatalogProduction");
 
                 foreach (IFormFile formFile in formFiles)
                 {

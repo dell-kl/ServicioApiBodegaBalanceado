@@ -86,6 +86,23 @@ namespace ServicioApiBodegaBalanceado.Controllers
             return Ok(datos);
         }
 
+        [HttpPut("EditarDataCatalogProduct")]
+        public async Task<IActionResult> EditarDataCatalogProduct([FromBody] CatalogProductDto catalogProduct)
+        {
+            CatalogProduction? catalogProduction = await _serviceManagement._CatalogProductService.Buscar(Guid.Parse(catalogProduct.identificador));
+
+            if (catalogProduction is null)
+                return StatusCode(StatusCodes.Status404NotFound, "No se ha podido identificar el producto, intentalo nuevamente.");
+
+            catalogProduction.CatalogProduction_name = catalogProduct.nombreProducto;
+            catalogProduction.CatalogProduction_updated = DateTime.Now;
+
+            _serviceManagement._CatalogProductService.Actualizar(catalogProduction);
+
+            return Ok("Catalogo Producto Editado Exitosamente");
+        }
+
+
         [HttpPost("RegistrarDataCatalogProduct")]
         public IActionResult RegistrarDataCatalogProduct([FromBody] CatalogProductDto catalogProduct)
         {
