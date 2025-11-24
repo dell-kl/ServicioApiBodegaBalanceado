@@ -13,5 +13,4 @@ namespace Domain.DTO.RequestDto
 
         public IEnumerable<DataImageDto> imagenes { set; get; } = new List<DataImageDto>();
     }
-
 }

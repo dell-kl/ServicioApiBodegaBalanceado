@@ -2,6 +2,7 @@ using Business.Services.IService;
 using Data.Repository.IRepository;
 using Domain;
 using Domain.DTO;
+using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
 using ServicioApiBodegaBalanceado.Domain.DTO;
 using Utility.Exceptions;
@@ -106,8 +107,11 @@ namespace Business.Services.ProductService
             throw new NotImplementedException();
         }
 
-        public Task<CatalogProduction> Buscar(Guid id, string properties = "") => _unitOfWork.CatalogProductRepository.Buscar(item => item.CatalogProduction_guid.Equals(id), properties);
-
+        public Task<CatalogProduction> Buscar(Guid id, string properties = "")
+        {
+            var resultado = _unitOfWork.CatalogProductRepository.Buscar(item => item.CatalogProduction_guid.Equals(id), properties);
+            return resultado;
+        }
         public async Task DeleteImages(ICollection<DataImageDto> images)
         {
             string PathUbication = Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageCatalogProduction");
@@ -128,6 +132,41 @@ namespace Business.Services.ProductService
 
             _unitOfWork.Save();
             _unitOfWork.Dispose();
+        }
+
+        public async Task<CatalogProductDetailsRequestDto> DetalleDataCatalogProduct(Guid guid)
+        {
+            try
+            {
+                CatalogProduction? catalogProduction = await this.Buscar(guid, "DataCatalogProduct, ImageCatalogProductions");
+
+                CatalogProductDetailsRequestDto detailes = new CatalogProductDetailsRequestDto()
+                {
+                    ultimaProduccion = 10,
+                    ultimaVenta = 201,
+                    categorias = 0,
+                    costalesTotal = 0,
+                    imagenes =
+                    catalogProduction.ImageCatalogProductions.Any() ?
+                    catalogProduction.ImageCatalogProductions.Select(item =>
+                    {
+                        return new DataImageDto()
+                        {
+                            Identificador = item.ImageCatalogProduction_guid.ToString(),
+                            Url = item.ImageCatalogProduction_name,
+                            Estado = false,
+                            Tipo = "catalogProduct"
+                        };
+
+                    }).ToList() : [new DataImageDto() { Url = "default_icon.png" }]
+                };
+
+                return detailes;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new OperationAbortExceptions(ex.Message);
+            }
         }
 
         public void Eliminar(CatalogProduction entity)
@@ -179,28 +218,29 @@ namespace Business.Services.ProductService
                     Guid identificadorIMG = Guid.NewGuid();
                     string PathFile = Path.GetFullPath(formFile.FileName);
                     string Extension = Path.GetExtension(formFile.FileName);
-                    string[] ExtensionAllowd = { ".png", ".jpg", "jpeg" };
+                    string[] ExtensionAllowd = { ".png", ".jpg", ".jpeg" };
                     var NewFileName = $"IMG_{identificadorIMG.ToString()}{Extension}";
-
-                    ImageCatalogProduction imagenCatalogoProducto = new ImageCatalogProduction()
-                    {
-                        ImageCatalogProduction_guid = identificadorIMG,
-                        ImageCatalogProduction_name = NewFileName,
-                        CatalogProduction = catalogProduction
-                    };
-                    DataImageDto dataImage = new()
-                    {
-                        Identificador = imagenCatalogoProducto.ImageCatalogProduction_guid.ToString(),
-                        Url = imagenCatalogoProducto.ImageCatalogProduction_name,
-                        Estado = false
-                    };
-                    imagenesCatalogProduction.Add(imagenCatalogoProducto);
-                    datImages.Add(dataImage);
 
                     if (formFile.Length <= 3145728 && ExtensionAllowd.Contains(Extension))
                     {
                         if (!Directory.Exists(PathUbication))
                             Directory.CreateDirectory(PathUbication);
+
+                        ImageCatalogProduction imagenCatalogoProducto = new ImageCatalogProduction()
+                        {
+                            ImageCatalogProduction_guid = identificadorIMG,
+                            ImageCatalogProduction_name = NewFileName,
+                            CatalogProduction = catalogProduction
+                        };
+                        DataImageDto dataImage = new()
+                        {
+                            Identificador = imagenCatalogoProducto.ImageCatalogProduction_guid.ToString(),
+                            Url = imagenCatalogoProducto.ImageCatalogProduction_name,
+                            Estado = false,
+                            Tipo = "catalogProduct"
+                        };
+                        imagenesCatalogProduction.Add(imagenCatalogoProducto);
+                        datImages.Add(dataImage);
 
                         NewFileName = Path.Combine(PathUbication, NewFileName);
 

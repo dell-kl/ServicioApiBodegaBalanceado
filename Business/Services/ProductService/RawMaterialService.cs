@@ -160,7 +160,8 @@ namespace Business.Services.ProductService
                         {
                             Identificador = item.ImageRawMaterial_guid.ToString(),
                             Url = item.ImageRawMaterial_url,
-                            Estado = false
+                            Estado = false,
+                            Tipo = "rawMaterial"
                         };
                     }) : [new DataImageDto() { Url = "default_icon.png" }]
             };
@@ -211,29 +212,29 @@ namespace Business.Services.ProductService
                     Guid identificadorIMG = Guid.NewGuid();
                     string PathFile = Path.GetFullPath(formFile.FileName);
                     string Extension = Path.GetExtension(formFile.FileName);
-                    string[] ExtensionAllowd = { ".png", ".jpg", "jpeg" };
+                    string[] ExtensionAllowd = { ".png", ".jpg", ".jpeg" };
                     var NewFileName = $"IMG_{identificadorIMG.ToString()}{Extension}";
-
-                    ImageRawMaterial imagenRawMaterial = new ImageRawMaterial()
-                    {
-                        ImageRawMaterial_guid = identificadorIMG,
-                        ImageRawMaterial_url = NewFileName,
-                        RawMaterial = rawMaterial
-                    };
-                    DataImageDto dataImage = new()
-                    {
-                        Identificador = imagenRawMaterial.ImageRawMaterial_guid.ToString(),
-                        Url = imagenRawMaterial.ImageRawMaterial_url,
-                        Estado = false
-                    };
-                    imagenesRawMaterial.Add(imagenRawMaterial);
-                    datImages.Add(dataImage);
 
                     if (formFile.Length <= 3145728 && ExtensionAllowd.Contains(Extension))
                     {
                         if (!Directory.Exists(PathUbication))
                             Directory.CreateDirectory(PathUbication);
 
+                        ImageRawMaterial imagenRawMaterial = new ImageRawMaterial()
+                        {
+                            ImageRawMaterial_guid = identificadorIMG,
+                            ImageRawMaterial_url = NewFileName,
+                            RawMaterial = rawMaterial
+                        };
+                        DataImageDto dataImage = new()
+                        {
+                            Identificador = imagenRawMaterial.ImageRawMaterial_guid.ToString(),
+                            Url = imagenRawMaterial.ImageRawMaterial_url,
+                            Estado = false,
+                            Tipo = "rawMaterial"
+                        };
+                        imagenesRawMaterial.Add(imagenRawMaterial);
+                        datImages.Add(dataImage);
 
                         NewFileName = Path.Combine(PathUbication, NewFileName);
 

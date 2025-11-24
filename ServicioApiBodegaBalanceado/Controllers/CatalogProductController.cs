@@ -34,7 +34,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
             {
                 var register = new CatalogProductRequestDto()
                 {
-                    guid = item.CatalogProduction_guid.ToString(),
+                    identificador = item.CatalogProduction_guid.ToString(),
                     nombreProducto = item.CatalogProduction_name,
                     rutaImagen = item.ImageCatalogProductions.Any() ? item.ImageCatalogProductions.First().ImageCatalogProduction_name : "default_icon.png",
                     fechaCreacion = item.CatalogProduction_created,
@@ -84,6 +84,24 @@ namespace ServicioApiBodegaBalanceado.Controllers
             }
 
             return Ok(datos);
+        }
+
+        [HttpGet("DetalleDataCatalogProduct/{guid}")]
+        public async Task<IActionResult> DetalleDataCatalogProduct(string guid)
+        {
+            if (Guid.TryParse(guid, out Guid identificador))
+            {
+                try
+                {
+                    return Ok(await _serviceManagement._CatalogProductService.DetalleDataCatalogProduct(identificador));
+                }
+                catch (OperationAbortExceptions ex)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, ex.message);
+                }
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, "El identificador del producto no tiene el formato correcto");
         }
 
         [HttpPut("EditarDataCatalogProduct")]
