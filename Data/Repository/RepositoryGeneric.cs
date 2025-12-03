@@ -28,6 +28,8 @@ namespace Data.Repository
             await this.dbSet.AddRangeAsync(entities);
         }
 
+
+
         public async Task<T> Buscar(Expression<Func<T, bool>> predicate, string includeProperties = null)
         {
             IQueryable<T> resultado = this.dbSet.Where(predicate);
@@ -97,6 +99,11 @@ namespace Data.Repository
         public void Delete(T entity)
         {
             this.dbSet.Remove(entity);
+        }
+
+        public async Task UpdateAll(IEnumerable<T> entities)
+        {
+            this.dbSet.UpdateRange(entities);
         }
     }
 }

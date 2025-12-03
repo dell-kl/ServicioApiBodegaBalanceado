@@ -37,7 +37,6 @@ namespace Domain
     public enum ESTADO
     {
         PRODUCCION = 1,
-        ETIQUETAR = 2,
-        FABRICADO = 3,
+        FABRICADO = 2,
     }
 }

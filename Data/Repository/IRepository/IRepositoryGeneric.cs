@@ -18,6 +18,8 @@ namespace Data.Repository.IRepository
 
         public void Update(T entity);
 
+        public Task UpdateAll(IEnumerable<T> entities);
+
         public void Delete(T entity);
     }
 }

@@ -12,16 +12,19 @@ namespace Business.Services.ProductService
 
         public ICatalogProductService _CatalogProductService { get; }
 
+        public IProductionService _ProductionService { get; }
+
         public readonly IUnitOfWork _unitOfWork;
 
         public ServiceManagement(IUnitOfWork unitOfWork)
         {
-
             _unitOfWork = unitOfWork;
 
             _RawMaterialService = new RawMaterialService(_unitOfWork);
             _KgMonitoringService = new KgMonitoringService(_unitOfWork);
             _CatalogProductService = new CatalogProductService(_unitOfWork);
+            _ProductionService = new ProductionServices(_unitOfWork);
         }
+
     }
 }
