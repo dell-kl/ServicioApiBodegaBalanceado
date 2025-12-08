@@ -1,4 +1,6 @@
 ﻿using Data.Repository.IRepository;
+using ServicioApiBodegaBalanceado.Data.Repository;
+using ServicioApiBodegaBalanceado.Data.Repository.IRepository;
 
 namespace Data.Repository
 {
@@ -11,7 +13,14 @@ namespace Data.Repository
         public IImageRawMaterial ImageRawMaterialRepository { set; get; } // Agregado
         public ICatalogProduct CatalogProductRepository { set; get; }
         public IImageCatalogProduction ImageCatalogProductionRepository { set; get; }
-    public IDataCatalogProduct DataCatalogProductRepository { set; get; }
+
+        public IMaterialProduction MaterialProductionRepository { set; get; }
+
+        public IDataCatalogProduct DataCatalogProductRepository { set; get; }
+
+        public IProfile ProfileRepository { set; get; }
+
+        public IProduction ProductionRepository { set; get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -23,6 +32,9 @@ namespace Data.Repository
             this.CatalogProductRepository = new CatalogProductRepository(context);
             this.ImageCatalogProductionRepository = new ImageCatalogProductionRepository(context);
             this.DataCatalogProductRepository = new DataCatalogProductRepository(context);
+            this.MaterialProductionRepository = new MaterialProductionRepository(context);
+            this.ProfileRepository = new ProfileRepository(context);
+            this.ProductionRepository = new ProductionRepository(context);
         }
 
         public void Dispose() => this._context.Dispose();

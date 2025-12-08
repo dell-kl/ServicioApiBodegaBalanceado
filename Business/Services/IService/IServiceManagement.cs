@@ -9,5 +9,7 @@ namespace Business.Services.IService
         public IKGMonitoringService _KgMonitoringService { get; }
 
         public ICatalogProductService _CatalogProductService { get; }
+
+        public IProductionService _ProductionService { get; }
     }
 }

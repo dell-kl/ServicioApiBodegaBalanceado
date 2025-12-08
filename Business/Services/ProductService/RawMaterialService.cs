@@ -6,7 +6,6 @@ using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data;
 using ServicioApiBodegaBalanceado.Domain.DTO;
-using Utility.DetectSO;
 using Utility.Exceptions;
 
 namespace Business.Services.ProductService
@@ -113,15 +112,11 @@ namespace Business.Services.ProductService
 
         public async Task DeleteImages(ICollection<DataImageDto> images)
         {
-
-            string PathUbication = $"{Directory.GetCurrentDirectory()}\\FilesPublic\\ImageRawMaterial";
+            string PathUbication = Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageRawMaterial");
 
             foreach (DataImageDto image in images)
             {
-                string PathComplete = $"{PathUbication}\\{image.Url}";
-
-                if (DetectSystemOperation.IsLinux())
-                    PathComplete = PathComplete.Replace("\\", "//");
+                string PathComplete = Path.Combine(PathUbication, image.Url);
 
                 if (File.Exists(PathComplete))
                     File.Delete(PathComplete);
@@ -165,7 +160,8 @@ namespace Business.Services.ProductService
                         {
                             Identificador = item.ImageRawMaterial_guid.ToString(),
                             Url = item.ImageRawMaterial_url,
-                            Estado = false
+                            Estado = false,
+                            Tipo = "rawMaterial"
                         };
                     }) : [new DataImageDto() { Url = "default_icon.png" }]
             };
@@ -180,6 +176,12 @@ namespace Business.Services.ProductService
         }
 
         public async Task<IEnumerable<RawMaterial>> Obtener(int skip, string data) => await _unitOfWork.RawMaterialRepository.Buscar(skip, data);
+
+        public async Task<IEnumerable<KgMonitoring>> ObtenerKgMonitorings(Guid rawMaterialGuid, int skip, string data)
+        {
+            // Busca los KgMonitoring asociados al RawMaterial filtrando por guid, paginando de 10 en 10.
+            return await _unitOfWork.KgMonitoring.Buscar(item => item.RawMaterial.RawMaterial_guid.Equals(rawMaterialGuid), skip, data);
+        }
 
         public async Task<ICollection<DataImageDto>> SaveImages(IEnumerable<IFormFile> formFiles, Guid guid)
         {
@@ -203,41 +205,36 @@ namespace Business.Services.ProductService
 
                 ICollection<ImageRawMaterial> imagenesRawMaterial = new List<ImageRawMaterial>();
 
-                string pathPartial = "\\FilesPublic\\ImageRawMaterial";
-
-                if (DetectSystemOperation.IsLinux())
-                    pathPartial = pathPartial.Replace("\\", "//");
-
-                string PathUbication = $"{Directory.GetCurrentDirectory()}{pathPartial}";
+                string PathUbication = Path.Combine(Directory.GetCurrentDirectory(), "FilesPublic", "ImageRawMaterial");
 
                 foreach (IFormFile formFile in formFiles)
                 {
                     Guid identificadorIMG = Guid.NewGuid();
                     string PathFile = Path.GetFullPath(formFile.FileName);
                     string Extension = Path.GetExtension(formFile.FileName);
-                    string[] ExtensionAllowd = { ".png", ".jpg", "jpeg" };
+                    string[] ExtensionAllowd = { ".png", ".jpg", ".jpeg" };
                     var NewFileName = $"IMG_{identificadorIMG.ToString()}{Extension}";
-
-                    ImageRawMaterial imagenRawMaterial = new ImageRawMaterial()
-                    {
-                        ImageRawMaterial_guid = identificadorIMG,
-                        ImageRawMaterial_url = NewFileName,
-                        RawMaterial = rawMaterial
-                    };
-                    DataImageDto dataImage = new()
-                    {
-                        Identificador = imagenRawMaterial.ImageRawMaterial_guid.ToString(),
-                        Url = imagenRawMaterial.ImageRawMaterial_url,
-                        Estado = false
-                    };
-                    imagenesRawMaterial.Add(imagenRawMaterial);
-                    datImages.Add(dataImage);
 
                     if (formFile.Length <= 3145728 && ExtensionAllowd.Contains(Extension))
                     {
                         if (!Directory.Exists(PathUbication))
                             Directory.CreateDirectory(PathUbication);
 
+                        ImageRawMaterial imagenRawMaterial = new ImageRawMaterial()
+                        {
+                            ImageRawMaterial_guid = identificadorIMG,
+                            ImageRawMaterial_url = NewFileName,
+                            RawMaterial = rawMaterial
+                        };
+                        DataImageDto dataImage = new()
+                        {
+                            Identificador = imagenRawMaterial.ImageRawMaterial_guid.ToString(),
+                            Url = imagenRawMaterial.ImageRawMaterial_url,
+                            Estado = false,
+                            Tipo = "rawMaterial"
+                        };
+                        imagenesRawMaterial.Add(imagenRawMaterial);
+                        datImages.Add(dataImage);
 
                         NewFileName = Path.Combine(PathUbication, NewFileName);
 

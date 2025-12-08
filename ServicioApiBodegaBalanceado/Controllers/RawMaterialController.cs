@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using ServicioApiBodegaBalanceado.Domain.DTO;
 using System.Threading.Tasks;
-using Utility.DetectSO;
 using Utility.Exceptions;
 
 namespace ServicioApiBodegaBalanceado.Controllers
@@ -24,8 +23,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
         [HttpGet("SolicitarMateriaPrima/{skip}")]
         public async Task<IActionResult> SolicitarMateriaPrima(int skip)
         {
-            var listado =
-                (await _serviceManagement._RawMaterialService.Obtener(skip, "ImageRawMaterials, KgMonitorings"));
+            var listado = await _serviceManagement._RawMaterialService.Obtener(skip, "ImageRawMaterials, KgMonitorings");
 
             ICollection<RawMaterialRequestDto> datos = new List<RawMaterialRequestDto>();
             foreach (var item in listado)
@@ -42,7 +40,57 @@ namespace ServicioApiBodegaBalanceado.Controllers
                 datos.Add(register);
             }
 
-            return Ok(JsonConvert.SerializeObject(datos));
+            return Ok(datos);
+        }
+
+        [HttpGet("SolicitarKgMonitoring/{skip}")]
+        public async Task<IActionResult> SolicitarKgMonitoring(int skip, [FromQuery] string guid)
+        {
+            if (string.IsNullOrWhiteSpace(guid))
+                return StatusCode(StatusCodes.Status400BadRequest, "El identificador del producto no puede estar vacío");
+
+            Guid identificador;
+            try
+            {
+                identificador = Guid.Parse(guid);
+            }
+            catch (FormatException)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "El identificador del producto no tiene el formato correcto");
+            }
+
+            RawMaterial rawMaterial;
+            try
+            {
+                rawMaterial = await _serviceManagement._RawMaterialService.Buscar(identificador, "KgMonitorings");
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, "No se pudo encontrar el registro");
+            }
+
+            // Paginamos los KgMonitorings asociados similar al otro endpoint.
+            IEnumerable<KgMonitoring> listado = await _serviceManagement._RawMaterialService.ObtenerKgMonitorings(identificador, skip, "RawMaterial");
+
+            // Mapear a DTO sencillo (reutilizamos KGMonitoringDto para minimizar creación de nuevas clases)
+            ICollection<KgMonitoringRequestDto> datos = new List<KgMonitoringRequestDto>();
+            foreach (var item in listado)
+            {
+                KgMonitoringRequestDto kgDto = new()
+                {
+                    Guid = item.KgMonitoring_guid.ToString(),
+                    Cantidad = (int)item.KgMonitoring_Total,
+                    Kg = item.KgMonitoring_KGStandard,
+                    Precio = item.KgMonitoring_priceUnit,
+                    KgTotal = item.KgMonitoring_Total,
+                    PrecioTotal = item.KgMonitoring_priceTotal,
+                    FechaCreacion = item.KgMonitoring_created,
+                    FechaActualizacion = item.KgMonitoring_updated
+                };
+                datos.Add(kgDto);
+            }
+
+            return Ok(datos);
         }
 
         [HttpGet("DetalleMateriaPrima/{guid}")]
@@ -51,7 +99,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
             RawMaterialDetailsRequestDto rawMaterialDetails = await _serviceManagement._RawMaterialService.GetDetailesRawMaterial(Guid.Parse(guid));
 
-            return Ok(JsonConvert.SerializeObject(rawMaterialDetails));
+            return Ok(rawMaterialDetails);
         }
 
         [HttpPost("RegistrarMateriaPrima")]
@@ -62,11 +110,13 @@ namespace ServicioApiBodegaBalanceado.Controllers
                 _serviceManagement._RawMaterialService.Agregate(rawMaterial);
                 return Ok("Datos registrados exitosamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "El servidor tuvo un problema en guardar los datos");
             }
         }
+
+        // Eliminado endpoint duplicado SolicitarKgMonitorings para unificar lógica en SolicitarKgMonitoring
 
         [HttpPost("RegistrarImagenes")]
         public async Task<IActionResult> RegistrarImagenes([FromForm] IEnumerable<IFormFile> formFiles, [FromForm] string identificador)
@@ -106,35 +156,10 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
                 return Ok("Materia Prima Editado Exitosamente");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "El servidor no pudo actualizar los datos, intentalo en otro momento");
             }
-        }
-
-        [HttpGet("ViewImage/{guid}")]
-        public IActionResult ViewImage(string guid)
-        {
-            Response.Headers["Content-Type"] = "image/jpeg";
-
-            string pathPartial = "\\FilesPublic\\ImageRawMaterial";
-
-            if (DetectSystemOperation.IsLinux())
-                pathPartial = pathPartial.Replace("\\", "//");
-
-
-            string ruta = Path.Combine($"{Directory.GetCurrentDirectory()}{pathPartial}", guid);
-
-            if (Path.Exists(ruta))
-            {
-                byte[] byteLists = System.IO.File.ReadAllBytes(ruta);
-
-                return File(byteLists, "image/jpeg");
-            }
-
-            Response.Headers["Content-Type"] = "text/plain";
-
-            return StatusCode(StatusCodes.Status404NotFound, "Recurso no encontrado");
         }
 
 
@@ -147,7 +172,7 @@ namespace ServicioApiBodegaBalanceado.Controllers
 
                 return Ok("Imagenes eliminadas exitosamente");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "El servidor tuvo un problema al eliminar las imagenes");
             }

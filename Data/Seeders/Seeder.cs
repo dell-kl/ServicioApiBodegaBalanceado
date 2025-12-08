@@ -7,13 +7,14 @@ namespace Data.Seeders
     {
 
         private readonly ApplicationDbContext _context;
-        public Seeder(ApplicationDbContext context) {
+        public Seeder(ApplicationDbContext context)
+        {
             this._context = context;
         }
 
         public async void cargarDatos()
         {
-            if ( !_context.Rol.Any() )
+            if (!_context.Rol.Any())
             {
                 await _context.Rol.AddAsync(new Domain.Rol()
                 {
@@ -31,7 +32,7 @@ namespace Data.Seeders
             }
 
 
-            if (!_context.User.Any()) 
+            if (!_context.User.Any())
             {
 
                 PasswordEncryption<User> encriptar = new PasswordEncryption<User>();
@@ -78,7 +79,7 @@ namespace Data.Seeders
                 _context.SaveChanges();
             }
 
-           
+
         }
     }
 }

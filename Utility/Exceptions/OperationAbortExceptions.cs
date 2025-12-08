@@ -2,6 +2,15 @@
 {
     public class OperationAbortExceptions : OperationCanceledException
     {
-        public OperationAbortExceptions() { }
+        public string message = "";
+
+        public OperationAbortExceptions()
+        {
+        }
+
+        public OperationAbortExceptions(string message)
+        {
+            this.message = message;
+        }
     }
 }
