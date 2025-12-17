@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "dgSpecHash": "t+R8XJMMNKQ=",
+  "success": true,
+  "projectFilePath": "/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/Utility/Utility.csproj",
+  "expectedPackageFiles": [
+    "/home/dell-kl/.nuget/packages/microsoft.aspnetcore.cryptography.internal/10.0.0/microsoft.aspnetcore.cryptography.internal.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.aspnetcore.cryptography.keyderivation/10.0.0/microsoft.aspnetcore.cryptography.keyderivation.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.aspnetcore.dataprotection/10.0.0/microsoft.aspnetcore.dataprotection.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.aspnetcore.dataprotection.abstractions/10.0.0/microsoft.aspnetcore.dataprotection.abstractions.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.aspnetcore.http.features/6.0.0-preview.4.21253.5/microsoft.aspnetcore.http.features.6.0.0-preview.4.21253.5.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.0/microsoft.extensions.configuration.abstractions.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.dependencyinjection/10.0.0/microsoft.extensions.dependencyinjection.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.0/microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.diagnostics.abstractions/10.0.0/microsoft.extensions.diagnostics.abstractions.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.fileproviders.abstractions/10.0.0/microsoft.extensions.fileproviders.abstractions.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.hosting.abstractions/10.0.0/microsoft.extensions.hosting.abstractions.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.identity.core/10.0.0/microsoft.extensions.identity.core.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.logging/10.0.0/microsoft.extensions.logging.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.0/microsoft.extensions.logging.abstractions.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.options/10.0.0/microsoft.extensions.options.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/microsoft.extensions.primitives/10.0.0/microsoft.extensions.primitives.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/system.security.cryptography.pkcs/10.0.0/system.security.cryptography.pkcs.10.0.0.nupkg.sha512",
+    "/home/dell-kl/.nuget/packages/system.security.cryptography.xml/10.0.0/system.security.cryptography.xml.10.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
