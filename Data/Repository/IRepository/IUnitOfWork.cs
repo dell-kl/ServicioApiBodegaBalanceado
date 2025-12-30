@@ -17,6 +17,8 @@ namespace Data.Repository.IRepository
         public IProfile ProfileRepository { get; }
 
         public IProduction ProductionRepository { get; }
+        
+        public IProductManufactured ProductManufacturedRepository { get; }
 
         public void Save();
     }

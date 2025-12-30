@@ -21,6 +21,8 @@ namespace Data.Repository
         public IProfile ProfileRepository { set; get; }
 
         public IProduction ProductionRepository { set; get; }
+        
+        public IProductManufactured ProductManufacturedRepository { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -35,6 +37,7 @@ namespace Data.Repository
             this.MaterialProductionRepository = new MaterialProductionRepository(context);
             this.ProfileRepository = new ProfileRepository(context);
             this.ProductionRepository = new ProductionRepository(context);
+            this.ProductManufacturedRepository = new ProductManufacturedRepository(context);
         }
 
         public void Dispose() => this._context.Dispose();

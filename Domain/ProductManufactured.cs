@@ -16,13 +16,13 @@ namespace Domain
         public DateTime ProductManufactured_updated { set; get; } = DateTime.Now;
 
         [Column("ProductManufactured_IDDataCatalogProduct")]
-        public int DataCatalogProductDataCatalogProduct_id { set; get; }
+        public int? DataCatalogProductDataCatalogProduct_id { set; get; } = null;
 
         [Column("ProductManufactured_IDProduction")]
         public int ProductionProduction_id { set; get; }
 
         [ForeignKey("DataCatalogProductDataCatalogProduct_id")]
-        public DataCatalogProduct DataCatalogProduct { set; get; } = null!;
+        public DataCatalogProduct? DataCatalogProduct { set; get; } = null;
 
         [ForeignKey("ProductionProduction_id")]
         public Production Production { set; get; } = null!;

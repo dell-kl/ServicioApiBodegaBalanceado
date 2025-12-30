@@ -3,6 +3,7 @@ using Data.Repository.IRepository;
 using Domain;
 using Domain.DTO;
 using Domain.DTO.RequestDto;
+using Utility.Exceptions;
 
 namespace Business.Services.ProductService
 {
@@ -27,55 +28,63 @@ namespace Business.Services.ProductService
 
         public async Task generarProduccion(ProductionDto entityDto)
         {
-            //vamos a tener que definir la parte de nuestro usuario que va a generar la produccion.
-            //Este es una busqueda de ejemplo, en base a un GUID fijo. POrque todavia no hay una 
-            //implementacion dinamica de usuario.
-            Profile profile = await _unitOfWork.ProfileRepository.Buscar(item => item.Profile_guid.Equals(Guid.Parse("441AC444-202E-4125-8F4E-EA312B40F9F7")), "User,Rol");
+            // vamos a tener que definir la parte de nuestro usuario que va a generar la produccion.
+            // Este es una busqueda de ejemplo, en base a un GUID fijo. POrque todavia no hay una 
+            // implementacion dinamica de usuario.
+             Profile profile = await _unitOfWork.ProfileRepository.Buscar(item => item.UserUser_id == 1, "User,Rol");
+            
+             CatalogProduction catalogProduction = await _unitOfWork.CatalogProductRepository.Buscar(item => item.CatalogProduction_guid.Equals(Guid.Parse(entityDto.catalogoIdentificador)));
+             // DataCatalogProduct dataCatalogProducto = await _unitOfWork.DataCatalogProductRepository.Buscar(item => item.DataCatalogProduct_guid.Equals(Guid.Parse(entityDto.dataCatalogoIdentificador)));
+             // dataCatalogProducto.CatalogProduction = catalogProduction;
+             
+             Production production = new Production()
+             {
+                 Production_KGTotal = entityDto.materialesProduccion.Sum(item => item.KgUse_dto),
+                 Production_name = entityDto.nombreProduccion,
+                 Production_numberTimesManufactured = entityDto.numeroVecesProduccion,
+                 CatalogProduction = catalogProduction,
+                 ProductManufactureds = [
+                     new ProductManufactured()
+                     {
+                         ProductManufactured_count = 0,
+                     }
+                 ],
+                 Profile = profile
+             };
+            
+             ICollection<MaterialProduction> materialProductions = new List<MaterialProduction>();
+             ICollection<RawMaterial> rawMaterials = new List<RawMaterial>();
 
-            CatalogProduction catalogProduction = await _unitOfWork.CatalogProductRepository.Buscar(item => item.CatalogProduction_guid.Equals(Guid.Parse(entityDto.catalogoIdentificador)));
-            DataCatalogProduct dataCatalogProducto = await _unitOfWork.DataCatalogProductRepository.Buscar(item => item.DataCatalogProduct_guid.Equals(Guid.Parse(entityDto.dataCatalogoIdentificador)));
-            dataCatalogProducto.CatalogProduction = catalogProduction;
+             foreach (MaterialProducionDto item in entityDto.materialesProduccion)
+             {
+                 RawMaterial rawMaterial = await _unitOfWork.RawMaterialRepository
+                     .Buscar(element => element.RawMaterial_guid.Equals(Guid.Parse(item.id_dto)));
 
-            Production production = new Production()
-            {
-                Production_KGTotal = entityDto.materialesProduccion.Sum(item => item.KgUse_dto),
-                CatalogProduction = catalogProduction,
-                ProductManufactureds = [
-                    new ProductManufactured()
-                    {
-                        ProductManufactured_count = 0,
-                        DataCatalogProduct = dataCatalogProducto,
-                    }
-                ],
-                Profile = profile
-            };
+                 double cantidadAUsar = (item.KgUse_dto * entityDto.numeroVecesProduccion);
 
-            ICollection<MaterialProduction> materialProductions = new List<MaterialProduction>();
-            ICollection<RawMaterial> rawMaterials = new List<RawMaterial>();
-
-            foreach (MaterialProducionDto item in entityDto.materialesProduccion)
-            {
-                RawMaterial rawMaterial = await _unitOfWork.RawMaterialRepository
-                    .Buscar(element => element.RawMaterial_guid.Equals(Guid.Parse(item.id_dto)));
-
-                rawMaterial.RawMaterial_KgTotal -= item.KgUse_dto;
-
-                MaterialProduction materialProduction = new MaterialProduction()
-                {
-                    MaterialProduction_KGUsed = item.KgUse_dto,
-                    RawMaterial = rawMaterial,
-                    Production = production
-                };
-
-                materialProductions.Add(materialProduction);
-                rawMaterials.Add(rawMaterial);
-            }
-
-            await _unitOfWork.RawMaterialRepository.UpdateAll(rawMaterials);
-            await _unitOfWork.MaterialProductionRepository.CreateAll(materialProductions);
-
-            _unitOfWork.Save();
-            _unitOfWork.Dispose();
+                 if (rawMaterial.RawMaterial_KgTotal >= cantidadAUsar)
+                 {
+                     rawMaterial.RawMaterial_KgTotal -= cantidadAUsar;
+                
+                     MaterialProduction materialProduction = new MaterialProduction()
+                     {
+                         MaterialProduction_KGUsed = cantidadAUsar,
+                         RawMaterial = rawMaterial,
+                         Production = production
+                     };
+                
+                     materialProductions.Add(materialProduction);
+                     rawMaterials.Add(rawMaterial);
+                 }
+                 else
+                     throw new OperationAbortExceptions("No hay suficiente materia prima para realizar la produccion. Revisa la bodega.");
+             }
+            
+             await _unitOfWork.RawMaterialRepository.UpdateAll(rawMaterials);
+             await _unitOfWork.MaterialProductionRepository.CreateAll(materialProductions);
+            
+             _unitOfWork.Save();
+             _unitOfWork.Dispose();
         }
 
         public void Agregate(ProductionDto entityDto)
@@ -106,7 +115,7 @@ namespace Business.Services.ProductService
         public Task<IEnumerable<Production>> Obtener(int skip, string data)
         {
             //vamos a obtener por partes los datos de produccion.
-            return _unitOfWork.ProductionRepository.Buscar(skip, data);
+            return _unitOfWork.ProductionRepository.Buscar(item => item.Production_status == ESTADO.PRODUCCION,skip, data);
         }
 
         public async Task editarEstadoProduccion(IEnumerable<ProductionRequestDto> productionRequestDto)

@@ -333,7 +333,7 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductManufactured_id"));
 
-                    b.Property<int>("DataCatalogProductDataCatalogProduct_id")
+                    b.Property<int?>("DataCatalogProductDataCatalogProduct_id")
                         .HasColumnType("int")
                         .HasColumnName("ProductManufactured_IDDataCatalogProduct");
 
@@ -382,6 +382,13 @@ namespace Data.Migrations
 
                     b.Property<Guid>("Production_guid")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Production_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Production_numberTimesManufactured")
+                        .HasColumnType("int");
 
                     b.Property<int>("Production_status")
                         .HasColumnType("int");
@@ -676,9 +683,7 @@ namespace Data.Migrations
                 {
                     b.HasOne("Domain.DataCatalogProduct", "DataCatalogProduct")
                         .WithMany("ProductManufactureds")
-                        .HasForeignKey("DataCatalogProductDataCatalogProduct_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DataCatalogProductDataCatalogProduct_id");
 
                     b.HasOne("Domain.Production", "Production")
                         .WithMany("ProductManufactureds")

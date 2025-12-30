@@ -9,7 +9,11 @@ namespace Domain
         public int Production_id { set; get; }
         public Guid Production_guid { set; get; } = Guid.NewGuid();
 
+        public string Production_name { set; get; } = null!;
+
         public double Production_KGTotal { set; get; } = 0.0d;
+        
+        public int Production_numberTimesManufactured { set; get; } = 0;
 
         public ESTADO Production_status { set; get; } = ESTADO.PRODUCCION;
 

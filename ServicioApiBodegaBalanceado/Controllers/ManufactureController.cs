@@ -4,6 +4,7 @@ using Domain;
 using Domain.DTO;
 using Domain.DTO.RequestDto;
 using Microsoft.AspNetCore.Mvc;
+using Utility.Exceptions;
 
 namespace ServicioApiBodegaBalanceado.Controllers;
 
@@ -17,8 +18,7 @@ public class ManufactureController : ControllerBase
     {
         this._serviceManagement = serviceManagement;
     }
-
-
+    
     // GET
     [HttpGet("ObtenerDatosProduccion/{skip}")]
     public async Task<IActionResult> ObtenerDatosProduccion(int skip)
@@ -30,9 +30,11 @@ public class ManufactureController : ControllerBase
             return new ProductionRequestDto()
             {
                 Identificador = item.Production_guid.ToString(),
+                IdentificadorCatalogoProduccion = item.CatalogProduction.CatalogProduction_guid.ToString(),
                 KgTotal = item.Production_KGTotal,
                 Estado = (int)item.Production_status,
-                NombreProducto = item.CatalogProduction.CatalogProduction_name,
+                NombreProducto = item.Production_name,
+                TipoProduccion = item.CatalogProduction.CatalogProduction_name,
                 Creado = item.Production_created,
                 Actualizado = item.Production_updated
             };
@@ -45,9 +47,15 @@ public class ManufactureController : ControllerBase
     [HttpPost("GenerarProduccion")]
     public async Task<IActionResult> GenerarProduccion([FromBody] ProductionDto productionDto)
     {
-        await this._serviceManagement._ProductionService.generarProduccion(productionDto);
-
-        return Ok("Produccion generada correctamente");
+        try
+        {
+            await this._serviceManagement._ProductionService.generarProduccion(productionDto);
+            return Ok("Produccion generada correctamente");
+        }
+        catch (OperationAbortExceptions exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, exception.message);
+        }
     }
 
 

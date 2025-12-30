@@ -1,5 +1,6 @@
 ﻿using Business.Services.IService;
 using Data.Repository.IRepository;
+using ServicioApiBodegaBalanceado.Business.Services.IService;
 
 namespace Business.Services.ProductService
 {
@@ -13,6 +14,8 @@ namespace Business.Services.ProductService
         public ICatalogProductService _CatalogProductService { get; }
 
         public IProductionService _ProductionService { get; }
+        
+        public IManufacturedServices _ManufacturedServices { get; }
 
         public readonly IUnitOfWork _unitOfWork;
 
@@ -24,6 +27,7 @@ namespace Business.Services.ProductService
             _KgMonitoringService = new KgMonitoringService(_unitOfWork);
             _CatalogProductService = new CatalogProductService(_unitOfWork);
             _ProductionService = new ProductionServices(_unitOfWork);
+            _ManufacturedServices = new ManufacturedServices(_unitOfWork);
         }
 
     }

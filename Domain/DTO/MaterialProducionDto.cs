@@ -10,3 +10,4 @@ namespace Domain.DTO
         public double KgUse_dto { set; get; }
     }
 }
+ 

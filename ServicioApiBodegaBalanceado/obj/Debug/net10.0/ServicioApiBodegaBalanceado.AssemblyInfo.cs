@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ServicioApiBodegaBalanceado")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+65819928cd441a2ee7d248ecdd53d1b6191eadfe")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c28dd63092d086480f1104e70884707c8a0faefe")]
 [assembly: System.Reflection.AssemblyProductAttribute("ServicioApiBodegaBalanceado")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ServicioApiBodegaBalanceado")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

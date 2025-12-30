@@ -217,3 +217,15 @@
 /home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/obj/Debug/net10.0/ServicioApiBodegaBalanceado.pdb
 /home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/obj/Debug/net10.0/ServicioApiBodegaBalanceado.genruntimeconfig.cache
 /home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/obj/Debug/net10.0/ref/ServicioApiBodegaBalanceado.dll
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/BuildHost-net472/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.exe.config
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/BuildHost-netcore/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll.config
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/web.config
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/appsettings.Docker.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/appsettings.Development.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/appsettings.Docker.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/appsettings.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/BuildHost-netcore/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.deps.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/BuildHost-netcore/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.runtimeconfig.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/ServicioApiBodegaBalanceado.deps.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/ServicioApiBodegaBalanceado.runtimeconfig.json
+/home/dell-kl/Escritorio/SistemaBalanceado/ServicioApiBodegaBalanceado/ServicioApiBodegaBalanceado/bin/Debug/net10.0/Publish/ServicioApiBodegaBalanceado.staticwebassets.endpoints.json

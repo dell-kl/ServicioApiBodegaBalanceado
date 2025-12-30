@@ -284,7 +284,9 @@ namespace Data.Migrations
                     Production_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Production_guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Production_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Production_KGTotal = table.Column<double>(type: "float", nullable: false),
+                    Production_numberTimesManufactured = table.Column<int>(type: "int", nullable: false),
                     Production_status = table.Column<int>(type: "int", nullable: false),
                     Production_created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Production_updated = table.Column<DateTime>(type: "datetime2", nullable: false),
